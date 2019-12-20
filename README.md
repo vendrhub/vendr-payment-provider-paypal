@@ -1,2 +1,3 @@
-# vendr-payment-provider-paypal
-PayPal Payment Provider for Vendr, the eCommerce solution for Umbraco v8+
+# Vendr PayPal Payment Provider
+
+PayPal Payment Provider for Vendr, the eCommerce package for Umbrao v8+
