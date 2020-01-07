@@ -1,4 +1,4 @@
-﻿namespace Vendr.PaymentProvider.PayPal
+﻿namespace Vendr.PaymentProvider.PayPal.Api.Models
 {
     public enum PayPalPaymentProviderMode
     {

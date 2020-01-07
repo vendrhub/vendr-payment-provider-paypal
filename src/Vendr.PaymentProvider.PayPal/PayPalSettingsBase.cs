@@ -19,15 +19,35 @@ namespace Vendr.PaymentProvider.PayPal
             SortOrder = 300)]
         public string ErrorUrl { get; set; }
 
-        //[PaymentProviderSetting(Name = "Test Secret Key", 
-        //    Description = "Your test PayPal secret key",
-        //    SortOrder = 400)]
-        //public string TestSecretKey { get; set; }
+        [PaymentProviderSetting(Name = "Sandbox Client ID",
+            Description = "Your sandbox PayPal client id",
+            SortOrder = 400)]
+        public string SandboxClientId { get; set; }
 
-        //[PaymentProviderSetting(Name = "Test Public Key", 
-        //    Description = "Your test PayPal public key",
-        //    SortOrder = 500)]
-        //public string TestPublicKey { get; set; }
+        [PaymentProviderSetting(Name = "Sandbox Secret",
+            Description = "Your sandbox PayPal secret",
+            SortOrder = 500)]
+        public string SandboxSecret { get; set; }
+
+        [PaymentProviderSetting(Name = "Sandbox Webhook ID",
+            Description = "Your sandbox PayPal webhook id",
+            SortOrder = 600)]
+        public string SandboxWebhookId { get; set; }
+
+        [PaymentProviderSetting(Name = "Live Client ID",
+            Description = "Your live PayPal client id",
+            SortOrder = 700)]
+        public string LiveClientId { get; set; }
+
+        [PaymentProviderSetting(Name = "Live Secret",
+            Description = "Your live PayPal secret",
+            SortOrder = 800)]
+        public string LiveSecret { get; set; }
+
+        [PaymentProviderSetting(Name = "Live Webhook ID",
+            Description = "Your live PayPal webhook id",
+            SortOrder = 900)]
+        public string LiveWebhookId { get; set; }
 
         //[PaymentProviderSetting(Name = "Test Webhook Signing Secret",
         //    Description = "Your test PayPal webhook signing secret",

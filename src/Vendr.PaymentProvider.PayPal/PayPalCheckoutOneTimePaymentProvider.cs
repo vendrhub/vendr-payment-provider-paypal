@@ -1,9 +1,16 @@
 ﻿using System;
+using System.Linq;
 using System.Web;
+using Flurl.Http;
 using Vendr.Core;
+using Vendr.Core.Web;
 using Vendr.Core.Models;
 using Vendr.Core.Web.Api;
 using Vendr.Core.Web.PaymentProviders;
+using Vendr.PaymentProvider.PayPal.Models;
+using System.Web.Mvc;
+using Vendr.PaymentProvider.PayPal.Api;
+using Vendr.PaymentProvider.PayPal.Api.Models;
 
 namespace Vendr.PaymentProvider.PayPal
 {
@@ -26,7 +33,17 @@ namespace Vendr.PaymentProvider.PayPal
         {
             try
             {
+                var clientConfig = GetPayPalClientConfig(settings);
+                var client = new PayPalClient(clientConfig);
+
+                //var payPalWebhookEvent = GetPayPalWebhookEvent(requestConfig, request);
                 
+                //if (payPalWebhookEvent != null && payPalWebhookEvent.EventType.StartsWith("CHECKOUT.ORDER."))
+                //{
+                //    var payPalOrder = payPalWebhookEvent.Resource.ToObject<PayPalOrder>();
+
+                //    return OrderReference.Parse(payPalOrder.PurchaseUnits[0].CustomId);
+                //}
             }
             catch (Exception ex)
             {
@@ -38,14 +55,51 @@ namespace Vendr.PaymentProvider.PayPal
 
         public override PaymentForm GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, PayPalCheckoutOneTimeSettings settings)
         {
-            return null;
+            // Create the order
+            var clientConfig = GetPayPalClientConfig(settings);
+            var client = new PayPalClient(clientConfig);
+            var createOrderResponse = client.CreateOrder(new PayPalCreateOrderRequest
+            {
+                Intent = PayPalOrderIntent.CAPTURE,
+                PurchaseUnits = new[] {
+                    new PayPalPurchaseUnitRequest {
+                        CustomId = order.GenerateOrderReference(),
+                        Amount = new PayPalAmount{
+                            CurrencyCode = "USD",
+                            Value = 0m
+                        }
+                    }
+                },
+                AplicationContext = new PayPalOrderApplicationContext
+                {
+                    BrandName = "Test",
+                    UserAction = "PAY_NOW",
+                    ReturnUrl = continueUrl,
+                    CancelUrl = cancelUrl
+                }
+            });
+
+            // Setup the payment form to redirect to approval link
+            var approveLink = createOrderResponse.Links.FirstOrDefault(x => x.Rel == "approve");
+            var approveLinkMethod = (FormMethod)Enum.Parse(typeof(FormMethod), approveLink.Method);
+
+            return new PaymentForm(approveLink.Href, approveLinkMethod);
         }
 
         public override CallbackResponse ProcessCallback(OrderReadOnly order, HttpRequestBase request, PayPalCheckoutOneTimeSettings settings)
         {
             try
             {
-                
+                var webhookId = settings.LiveWebhookId;
+
+                var clientConfig = GetPayPalClientConfig(settings);
+                var client = new PayPalClient(clientConfig);
+                var payPalWebhookEvent = client.ParseWebhookEvent(request, webhookId);
+
+                if (payPalWebhookEvent != null && payPalWebhookEvent.EventType.StartsWith("CHECKOUT.ORDER."))
+                {
+                    var payPalOrder = payPalWebhookEvent.Resource.ToObject<PayPalOrder>();
+                }
             }
             catch (Exception ex)
             {
