@@ -1,6 +1,6 @@
 ﻿using Vendr.Core.Web.PaymentProviders;
 
-namespace Vendr.PaymentProvider.PayPal
+namespace Vendr.PaymentProviders.PayPal
 {
     public class PayPalSettingsBase
     {

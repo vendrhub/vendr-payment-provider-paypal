@@ -9,10 +9,9 @@ using System.Web;
 using Vendr.Core.Models;
 using Vendr.Core.Web.Api;
 using Vendr.Core.Web.PaymentProviders;
-using Vendr.PaymentProvider.PayPal.Api.Models;
-using Vendr.PaymentProvider.PayPal.Models;
+using Vendr.PaymentProviders.PayPal.Api.Models;
 
-namespace Vendr.PaymentProvider.PayPal
+namespace Vendr.PaymentProviders.PayPal
 {
     public abstract class PayPalPaymentProviderBase<TSettings> : PaymentProviderBase<TSettings>
         where TSettings : PayPalSettingsBase, new()
@@ -98,18 +97,19 @@ namespace Vendr.PaymentProvider.PayPal
 
         protected PayPalClientConfig GetPayPalClientConfig(PayPalSettingsBase settings)
         {
-            var clientId = settings.Mode == PayPalPaymentProviderMode.Sandbox ? settings.SandboxClientId : settings.LiveClientId;
-            var secret = settings.Mode == PayPalPaymentProviderMode.Sandbox ? settings.SandboxSecret : settings.LiveSecret;
-            var webhookId = settings.Mode == PayPalPaymentProviderMode.Sandbox ? settings.SandboxWebhookId : settings.LiveWebhookId;
-            var apiBaseUrl = settings.Mode == PayPalPaymentProviderMode.Sandbox ? SanboxApiUrl : LiveApiUrl;
+            return null;
+            //var clientId = settings.Mode == PayPalPaymentProviderMode.Sandbox ? settings.SandboxClientId : settings.LiveClientId;
+            //var secret = settings.Mode == PayPalPaymentProviderMode.Sandbox ? settings.SandboxSecret : settings.LiveSecret;
+            //var webhookId = settings.Mode == PayPalPaymentProviderMode.Sandbox ? settings.SandboxWebhookId : settings.LiveWebhookId;
+            //var apiBaseUrl = settings.Mode == PayPalPaymentProviderMode.Sandbox ? SanboxApiUrl : LiveApiUrl;
 
-            return new PayPalClientConfig
-            {
-                ClientId = clientId,
-                Secret = secret,
-                WebhookId = webhookId,
-                BaseUrl = apiBaseUrl
-            };
+            //return new PayPalClientConfig
+            //{
+            //    ClientId = clientId,
+            //    Secret = secret,
+            //    WebhookId = webhookId,
+            //    BaseUrl = apiBaseUrl
+            //};
         }
 
         //protected static long DollarsToCents(decimal val)

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Vendr.PaymentProvider.PayPal.Api.Models
+namespace Vendr.PaymentProviders.PayPal.Api.Models
 {
     public class PayPalPurchaseUnitBase
     {

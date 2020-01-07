@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Vendr.PaymentProvider.PayPal.Api.Models
+namespace Vendr.PaymentProviders.PayPal.Api.Models
 {
     // https://developer.paypal.com/docs/api/orders/v2/#definition-order_application_context
 

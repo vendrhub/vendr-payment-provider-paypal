@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Vendr.PaymentProvider.PayPal")]
+[assembly: AssemblyTitle("Vendr.PaymentProviders.PayPal")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Vendr.PaymentProvider.PayPal")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyProduct("Vendr.PaymentProviders.PayPal")]
+[assembly: AssemblyCopyright("Copyright © Outfield Digital Ltd 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,17 +20,5 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("54d75f3d-bd42-45e8-bc99-210a9ad71ceb")]
+[assembly: Guid("ad3b3968-4e50-4b64-adc7-7eadc95ef0d8")]
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]

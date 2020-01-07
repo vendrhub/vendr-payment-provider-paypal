@@ -6,9 +6,9 @@ using System.Net;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
 using System.Web;
-using Vendr.PaymentProvider.PayPal.Api.Models;
+using Vendr.PaymentProviders.PayPal.Api.Models;
 
-namespace Vendr.PaymentProvider.PayPal.Api
+namespace Vendr.PaymentProviders.PayPal.Api
 {
     public class PayPalClient
     {

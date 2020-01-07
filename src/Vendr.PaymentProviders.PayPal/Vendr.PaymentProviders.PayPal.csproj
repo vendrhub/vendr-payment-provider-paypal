@@ -7,8 +7,8 @@
     <ProjectGuid>{54D75F3D-BD42-45E8-BC99-210A9AD71CEB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Vendr.PaymentProvider.PayPal</RootNamespace>
-    <AssemblyName>Vendr.PaymentProvider.PayPal</AssemblyName>
+    <RootNamespace>Vendr.PaymentProviders.PayPal</RootNamespace>
+    <AssemblyName>Vendr.PaymentProviders.PayPal</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -103,8 +103,9 @@
     <Compile Include="PayPalSettingsBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PayPalPaymentProviderBase.cs" />
-    <Compile Include="Api\Models\PayPalPaymentProviderMode.cs" />
+    <Compile Include="PayPalPaymentProviderMode.cs" />
     <Compile Include="PayPalCheckoutOneTimeSettings.cs" />
+    <Compile Include="Properties\VersionInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

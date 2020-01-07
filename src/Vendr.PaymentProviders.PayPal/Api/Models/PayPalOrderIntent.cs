@@ -1,4 +1,4 @@
-﻿namespace Vendr.PaymentProvider.PayPal.Api.Models
+﻿namespace Vendr.PaymentProviders.PayPal.Api.Models
 {
     public static class PayPalOrderIntent
     {

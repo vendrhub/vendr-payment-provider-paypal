@@ -7,12 +7,11 @@ using Vendr.Core.Web;
 using Vendr.Core.Models;
 using Vendr.Core.Web.Api;
 using Vendr.Core.Web.PaymentProviders;
-using Vendr.PaymentProvider.PayPal.Models;
+using Vendr.PaymentProviders.PayPal.Api.Models;
 using System.Web.Mvc;
-using Vendr.PaymentProvider.PayPal.Api;
-using Vendr.PaymentProvider.PayPal.Api.Models;
+using Vendr.PaymentProviders.PayPal.Api;
 
-namespace Vendr.PaymentProvider.PayPal
+namespace Vendr.PaymentProviders.PayPal
 {
     [PaymentProvider("paypal-checkout-onetime", "PayPal Checkout (One Time)", "PayPal Checkout payment provider for one time payments")]
     public class PayPalCheckoutOneTimePaymentProvider : PayPalPaymentProviderBase<PayPalCheckoutOneTimeSettings>
