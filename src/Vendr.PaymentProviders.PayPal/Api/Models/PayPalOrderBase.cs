@@ -2,7 +2,7 @@
 
 namespace Vendr.PaymentProviders.PayPal.Api.Models
 {
-    public class PayPalOrderBase<TPaymentUnit>
+    public class PayPalOrderBase<TPaymentUnit> : PayPalOrderMinimal
         where TPaymentUnit : PayPalPurchaseUnitBase
     {
         [JsonProperty("intent")]

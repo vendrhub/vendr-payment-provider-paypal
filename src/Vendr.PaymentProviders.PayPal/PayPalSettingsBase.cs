@@ -49,32 +49,17 @@ namespace Vendr.PaymentProviders.PayPal
             SortOrder = 900)]
         public string LiveWebhookId { get; set; }
 
-        //[PaymentProviderSetting(Name = "Test Webhook Signing Secret",
-        //    Description = "Your test PayPal webhook signing secret",
-        //    SortOrder = 600)]
-        //public string TestWebhookSigningSecret { get; set; }
-
-        //[PaymentProviderSetting(Name = "Live Secret Key", 
-        //    Description = "Your live PayPal secret key",
-        //    SortOrder = 700)]
-        //public string LiveSecretKey { get; set; }
-
-        //[PaymentProviderSetting(Name = "Live Public Key", 
-        //    Description = "Your live PayPal public key",
-        //    SortOrder = 800)]
-        //public string LivePublicKey { get; set; }
-
-        //[PaymentProviderSetting(Name = "Live Webhook Signing Secret",
-        //    Description = "Your live PayPal webhook signing secret",
-        //    SortOrder = 900)]
-        //public string LiveWebhookSigningSecret { get; set; }
-
-        //[PaymentProviderSetting(Name = "Mode", 
-        //    Description = "Set whether to process payments in live or sandbox mode.",
-        //    SortOrder = 1000000)]
+        [PaymentProviderSetting(Name = "Mode",
+            Description = "Set whether to process payments in live or sandbox mode.",
+            SortOrder = 1000000)]
         public PayPalPaymentProviderMode Mode { get; set; }
 
         // Advanced settings
+        [PaymentProviderSetting(Name = "Brand Name",
+            Description = "A brand name to override the business name with on the PayPal Checkout pages ",
+            SortOrder = 100,
+            IsAdvanced = true)]
+        public string BrandName { get; set; }
 
     }
 }

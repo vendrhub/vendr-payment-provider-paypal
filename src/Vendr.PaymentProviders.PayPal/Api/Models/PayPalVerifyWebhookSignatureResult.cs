@@ -6,7 +6,7 @@ namespace Vendr.PaymentProviders.PayPal.Api.Models
 
     public class PayPalVerifyWebhookSignatureResult
     {
-        [JsonProperty("verification_status ")]
+        [JsonProperty("verification_status")]
         public string VerificationStatus { get; set; }
     }
 }

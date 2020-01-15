@@ -1,14 +1,9 @@
-﻿using Flurl.Http;
-using Newtonsoft.Json;
-using System;
-using System.IO;
-using System.Net;
-using System.Runtime.Caching;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using System.Web;
 using Vendr.Core.Models;
 using Vendr.Core.Web.Api;
 using Vendr.Core.Web.PaymentProviders;
+using Vendr.PaymentProviders.PayPal.Api;
 using Vendr.PaymentProviders.PayPal.Api.Models;
 
 namespace Vendr.PaymentProviders.PayPal
@@ -35,93 +30,131 @@ namespace Vendr.PaymentProviders.PayPal
             return settings.ErrorUrl;
         }
 
-        
+        protected PayPalWebhookEvent GetPayPalWebhookEvent(PayPalClient client, HttpRequestBase request)
+        {
+            PayPalWebhookEvent payPalWebhookEvent;
 
-        
+            if (HttpContext.Current.Items["Vendr_PayPalWebhookEvent"] != null)
+            {
+                payPalWebhookEvent = (PayPalWebhookEvent)HttpContext.Current.Items["Vendr_PayPalWebhookEvent"];
+            }
+            else
+            {
+                payPalWebhookEvent = client.ParseWebhookEvent(request);;
 
-        
+                HttpContext.Current.Items["Vendr_PayPalWebhookEvent"] = payPalWebhookEvent;
+            }
 
-        //protected PayPalWebhookEvent GetPayPalWebhookEvent(PayPalWebhookRequestConfig requestConfig, HttpRequestBase request)
-        //{
-        //    var payPalWebhookEvent = default(PayPalWebhookEvent);
+            return payPalWebhookEvent;
+        }
 
-        //    if (HttpContext.Current.Items["Vendr_PayPalWebhookEvent"] != null)
-        //    {
-        //        payPalWebhookEvent = (PayPalWebhookEvent)HttpContext.Current.Items["Vendr_PayPalWebhookEvent"];
-        //    }
-        //    else
-        //    {
-        //        payPalWebhookEvent = ParseAndValidatePayPalWebhookEvent(requestConfig, request);
+        protected PaymentStatus GetPaymentStatus(PayPalOrder payPalOrder)
+        {
+            return GetPaymentStatus(payPalOrder, out PayPalPayment payPalPayment);
+        }
 
-        //        HttpContext.Current.Items["Vendr_PayPalWebhookEvent"] = payPalWebhookEvent;
-        //    }
+        protected PaymentStatus GetPaymentStatus(PayPalOrder payPalOrder, out PayPalPayment payPalPayment)
+        {
+            payPalPayment = null;
 
-        //    return payPalWebhookEvent;
-        //}
+            if (payPalOrder.PurchaseUnits != null && payPalOrder.PurchaseUnits.Length == 1)
+            {
+                var purchaseUnit = payPalOrder.PurchaseUnits[0];
+                if (purchaseUnit.Payments != null)
+                {
+                    if (purchaseUnit.Payments.Refunds != null && purchaseUnit.Payments.Refunds.Length > 0)
+                    {
+                        payPalPayment = purchaseUnit.Payments.Refunds.First();
+                    }
+                    else if (purchaseUnit.Payments.Captures != null && purchaseUnit.Payments.Captures.Length > 0)
+                    {
+                        payPalPayment = purchaseUnit.Payments.Captures.First();
+                    }
+                    else if (purchaseUnit.Payments.Authorizations != null && purchaseUnit.Payments.Authorizations.Length > 0)
+                    {
+                        payPalPayment = purchaseUnit.Payments.Authorizations.First();
+                    }
 
-        //private PayPalWebhookEvent ParseAndValidatePayPalWebhookEvent(PayPalWebhookRequestConfig requestConfig, HttpRequestBase request)
-        //{
-        //    var payPalWebhookEvent = default(PayPalWebhookEvent);
+                    if (payPalPayment != null)
+                    {
+                        return GetPaymentStatus(payPalPayment);
+                    }
+                }
+            }
 
-        //    if (request.InputStream.CanSeek)
-        //        request.InputStream.Seek(0, SeekOrigin.Begin);
+            return PaymentStatus.Initialized;
+        }
 
-        //    using (var reader = new StreamReader(request.InputStream))
-        //    {
-        //        var json = reader.ReadToEnd();
+        protected PaymentStatus GetPaymentStatus(PayPalPayment payment)
+        {
+            if (payment is PayPalCapturePayment capturePayment)
+            {
+                switch (capturePayment.Status)
+                {
+                    case PayPalCapturePayment.Statuses.COMPLETED:
+                        return PaymentStatus.Captured;
+                    case PayPalCapturePayment.Statuses.PENDING:
+                        return PaymentStatus.PendingExternalSystem;
+                    case PayPalCapturePayment.Statuses.DECLINED:
+                        return PaymentStatus.Error;
+                    case PayPalCapturePayment.Statuses.REFUNDED:
+                    case PayPalCapturePayment.Statuses.PARTIALLY_REFUNDED:
+                        return PaymentStatus.Refunded;
+                }
+            }
+            else if (payment is PayPalAuthorizationPayment authPayment)
+            {
+                switch (authPayment.Status)
+                {
+                    case PayPalAuthorizationPayment.Statuses.CREATED:
+                        return PaymentStatus.Authorized;
+                    case PayPalAuthorizationPayment.Statuses.PENDING:
+                        return PaymentStatus.PendingExternalSystem;
+                    case PayPalAuthorizationPayment.Statuses.CAPTURED:
+                    case PayPalAuthorizationPayment.Statuses.PARTIALLY_CAPTURED:
+                        return PaymentStatus.Captured;
+                    case PayPalAuthorizationPayment.Statuses.DENIED:
+                        return PaymentStatus.Error;
+                    case PayPalAuthorizationPayment.Statuses.EXPIRED:
+                    case PayPalAuthorizationPayment.Statuses.VOIDED:
+                        return PaymentStatus.Cancelled;
+                }
+            }
+            else if (payment is PayPalRefundPayment refundPayment)
+            {
+                switch (refundPayment.Status)
+                {
+                    case PayPalRefundPayment.Statuses.CANCELLED:
+                    case PayPalRefundPayment.Statuses.PENDING:
+                        return PaymentStatus.Captured;
+                    case PayPalRefundPayment.Statuses.COMPLETED:
+                        return PaymentStatus.Refunded;
+                }
+            }
 
-        //        var tmpPayPalWebhookEvent = JsonConvert.DeserializeObject<PayPalWebhookEvent>(json);
-
-        //        var result = MakePayPalRequest("/v1/notifications/verify-webhook-signature", (req) => req
-        //            .PostJsonAsync(new PayPalVerifyWebhookSignatureRequest
-        //            {
-        //                AuthAlgorithm = request.Headers["paypal-auth-algo"],
-        //                CertUrl = request.Headers["paypal-cert-url"],
-        //                TransmissionId = request.Headers["paypal-transmission-id"],
-        //                TransmissionSignature = request.Headers["paypal-transmission-sig"],
-        //                TransmissionTime = request.Headers["paypal-transmission-time"],
-        //                WebhookId = requestConfig.WebhookId,
-        //                WebhookEvent = tmpPayPalWebhookEvent
-        //            })
-        //            .ReceiveJson<PayPalVerifyWebhookSignatureResult>(),
-        //            requestConfig);
-
-        //        if (result != null && result.VerificationStatus == "SUCCESS")
-        //        {
-        //            payPalWebhookEvent =  tmpPayPalWebhookEvent;
-        //        }
-        //    }
-
-        //    return payPalWebhookEvent;
-        //}
+            return PaymentStatus.Initialized;
+        }
 
         protected PayPalClientConfig GetPayPalClientConfig(PayPalSettingsBase settings)
         {
-            return null;
-            //var clientId = settings.Mode == PayPalPaymentProviderMode.Sandbox ? settings.SandboxClientId : settings.LiveClientId;
-            //var secret = settings.Mode == PayPalPaymentProviderMode.Sandbox ? settings.SandboxSecret : settings.LiveSecret;
-            //var webhookId = settings.Mode == PayPalPaymentProviderMode.Sandbox ? settings.SandboxWebhookId : settings.LiveWebhookId;
-            //var apiBaseUrl = settings.Mode == PayPalPaymentProviderMode.Sandbox ? SanboxApiUrl : LiveApiUrl;
-
-            //return new PayPalClientConfig
-            //{
-            //    ClientId = clientId,
-            //    Secret = secret,
-            //    WebhookId = webhookId,
-            //    BaseUrl = apiBaseUrl
-            //};
+            if (settings.Mode == PayPalPaymentProviderMode.Live)
+            {
+                return new LivePayPalClientConfig
+                {
+                    ClientId = settings.LiveClientId,
+                    Secret = settings.LiveSecret,
+                    WebhookId = settings.LiveWebhookId
+                };
+            }
+            else
+            {
+                return new SandboxPayPalClientConfig
+                {
+                    ClientId = settings.SandboxClientId,
+                    Secret = settings.SandboxSecret,
+                    WebhookId = settings.SandboxWebhookId
+                };
+            }
         }
-
-        //protected static long DollarsToCents(decimal val)
-        //{
-        //    var cents = val * 100M;
-        //    var centsRounded = Math.Round(cents, MidpointRounding.AwayFromZero);
-        //    return Convert.ToInt64(centsRounded);
-        //}
-
-        //protected static decimal CentsToDollars(long val)
-        //{
-        //    return val / 100M;
-        //}
     }
 }

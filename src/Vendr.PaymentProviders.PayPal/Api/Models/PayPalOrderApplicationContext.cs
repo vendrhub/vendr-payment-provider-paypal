@@ -15,7 +15,7 @@ namespace Vendr.PaymentProviders.PayPal.Api.Models
         [JsonProperty("landing_page")]
         public string LandingPage { get; set; }
 
-        [JsonProperty("shipping_reference")]
+        [JsonProperty("shipping_preference")]
         public string ShippingPreference { get; set; }
 
         [JsonProperty("user_action")]
@@ -26,5 +26,12 @@ namespace Vendr.PaymentProviders.PayPal.Api.Models
 
         [JsonProperty("cancel_url")]
         public string CancelUrl { get; set; }
+
+        public PayPalOrderApplicationContext()
+        {
+            LandingPage = "NO_PREFERENCE";
+            ShippingPreference = "GET_FROM_FILE";
+            UserAction = "CONTINUE";
+        }
     }
 }

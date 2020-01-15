@@ -8,6 +8,6 @@ namespace Vendr.PaymentProviders.PayPal.Api.Models
         public string CurrencyCode { get; set; }
 
         [JsonProperty("value")]
-        public decimal Value { get; set; }
+        public string Value { get; set; }
     }
 }

@@ -82,22 +82,28 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\Models\LivePayPalClientConfig.cs" />
     <Compile Include="Api\Models\PayPalAccessTokenResult.cs" />
     <Compile Include="Api\Models\PayPalAmount.cs" />
+    <Compile Include="Api\Models\PayPalAuthorizationPayment.cs" />
+    <Compile Include="Api\Models\PayPalCapturePayment.cs" />
     <Compile Include="Api\Models\PayPalCreateOrderRequest.cs" />
     <Compile Include="Api\Models\PayPalHateoasLink.cs" />
     <Compile Include="Api\Models\PayPalOrder.cs" />
     <Compile Include="Api\Models\PayPalOrderApplicationContext.cs" />
     <Compile Include="Api\Models\PayPalOrderBase.cs" />
-    <Compile Include="Api\Models\PayPalOrderIntent.cs" />
+    <Compile Include="Api\Models\PayPalOrderMinimal.cs" />
+    <Compile Include="Api\Models\PayPalPayment.cs" />
     <Compile Include="Api\Models\PayPalPurchaseUnit.cs" />
     <Compile Include="Api\Models\PayPalPurchaseUnitBase.cs" />
+    <Compile Include="Api\Models\PayPalPaymentCollection.cs" />
     <Compile Include="Api\Models\PayPalPurchaseUnitRequest.cs" />
-    <Compile Include="Api\Models\PayPalCreateOrderResponse.cs" />
     <Compile Include="Api\Models\PayPalClientConfig.cs" />
+    <Compile Include="Api\Models\PayPalRefundPayment.cs" />
     <Compile Include="Api\Models\PayPalVerifyWebhookSignatureResult.cs" />
     <Compile Include="Api\Models\PayPalVerifyWebhookSignatureRequest.cs" />
     <Compile Include="Api\Models\PayPalWebhookEvent.cs" />
+    <Compile Include="Api\Models\SandboxPayPalClientConfig.cs" />
     <Compile Include="Api\PayPalClient.cs" />
     <Compile Include="PayPalCheckoutOneTimePaymentProvider.cs" />
     <Compile Include="PayPalSettingsBase.cs" />

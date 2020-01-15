@@ -2,7 +2,7 @@
 
 namespace Vendr.PaymentProviders.PayPal.Api.Models
 {
-    public class PayPalCreateOrderResponse
+    public class PayPalOrderMinimal
     {
         [JsonProperty("id")]
         public string Id { get; set; }

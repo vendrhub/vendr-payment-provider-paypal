@@ -25,14 +25,64 @@ namespace Vendr.PaymentProviders.PayPal.Api
             _config = config;
         }
 
-        public PayPalCreateOrderResponse CreateOrder(PayPalCreateOrderRequest request)
+        public PayPalOrder CreateOrder(PayPalCreateOrderRequest request)
         {
             return Request("/v2/checkout/orders", (req) => req
+                .WithHeader("Prefer", "return=representation")
                 .PostJsonAsync(request)
-                .ReceiveJson<PayPalCreateOrderResponse>());
+                .ReceiveJson<PayPalOrder>());
         }
 
-        public PayPalWebhookEvent ParseWebhookEvent(HttpRequestBase request, string webhookId)
+        public PayPalOrder GetOrder(string orderId)
+        {
+            return Request($"/v2/checkout/orders/{orderId}", (req) => req
+                .WithHeader("Prefer", "return=representation")
+                .GetAsync()
+                .ReceiveJson<PayPalOrder>());
+        }
+
+        public PayPalOrder AuthorizeOrder(string orderId)
+        {
+            return Request($"/v2/checkout/orders/{orderId}/authorize", (req) => req
+                .WithHeader("Prefer", "return=representation")
+                .PostJsonAsync(null)
+                .ReceiveJson<PayPalOrder>());
+        }
+
+        public PayPalOrder CaptureOrder(string orderId)
+        {
+            return Request($"/v2/checkout/orders/{orderId}/capture", (req) => req
+                .WithHeader("Prefer", "return=representation")
+                .PostJsonAsync(null)
+                .ReceiveJson<PayPalOrder>());
+        }
+
+        public PayPalCapturePayment CapturePayment(string paymentId)
+        {
+            return Request($"/v2/payments/authorizations/{paymentId}/capture", (req) => req
+                .WithHeader("Prefer", "return=representation")
+                .PostJsonAsync(new
+                {
+                    final_capture = true
+                })
+                .ReceiveJson<PayPalCapturePayment>());
+        }
+
+        public PayPalRefundPayment RefundPayment(string paymentId)
+        {
+            return Request($"/v2/payments/captures/{paymentId}/refund", (req) => req
+                .PostJsonAsync(null)
+                .ReceiveJson<PayPalRefundPayment>());
+        }
+
+        public void CancelPayment(string paymentId)
+        {
+            Request($"/v2/payments/authorizations/{paymentId}/capture", (req) => req
+                .WithHeader("Prefer", "return=representation")
+                .PostJsonAsync(null));
+        }
+
+        public PayPalWebhookEvent ParseWebhookEvent(HttpRequestBase request)
         {
             var payPalWebhookEvent = default(PayPalWebhookEvent);
 
@@ -43,24 +93,27 @@ namespace Vendr.PaymentProviders.PayPal.Api
             {
                 var json = reader.ReadToEnd();
 
-                var tmpPayPalWebhookEvent = JsonConvert.DeserializeObject<PayPalWebhookEvent>(json);
+                var webhookSignatureRequest = new PayPalVerifyWebhookSignatureRequest
+                {
+                    AuthAlgorithm = request.Headers["paypal-auth-algo"],
+                    CertUrl = request.Headers["paypal-cert-url"],
+                    TransmissionId = request.Headers["paypal-transmission-id"],
+                    TransmissionSignature = request.Headers["paypal-transmission-sig"],
+                    TransmissionTime = request.Headers["paypal-transmission-time"],
+                    WebhookId = _config.WebhookId,
+                    WebhookEvent = new { }
+                };
+
+                var webhookSignatureRequestStr = JsonConvert.SerializeObject(webhookSignatureRequest).Replace("{}", json);
 
                 var result = Request("/v1/notifications/verify-webhook-signature", (req) => req
-                    .PostJsonAsync(new PayPalVerifyWebhookSignatureRequest
-                    {
-                        AuthAlgorithm = request.Headers["paypal-auth-algo"],
-                        CertUrl = request.Headers["paypal-cert-url"],
-                        TransmissionId = request.Headers["paypal-transmission-id"],
-                        TransmissionSignature = request.Headers["paypal-transmission-sig"],
-                        TransmissionTime = request.Headers["paypal-transmission-time"],
-                        WebhookId = webhookId,
-                        WebhookEvent = tmpPayPalWebhookEvent
-                    })
+                    .WithHeader("Content-Type", "application/json")
+                    .PostStringAsync(webhookSignatureRequestStr)
                     .ReceiveJson<PayPalVerifyWebhookSignatureResult>());
 
                 if (result != null && result.VerificationStatus == "SUCCESS")
                 {
-                    payPalWebhookEvent = tmpPayPalWebhookEvent;
+                    payPalWebhookEvent = JsonConvert.DeserializeObject<PayPalWebhookEvent>(json);
                 }
             }
 
@@ -152,7 +205,6 @@ namespace Vendr.PaymentProviders.PayPal.Api
         private PayPalAccessTokenResult Authenticate()
         {
             return new FlurlRequest(_config.BaseUrl + "/v1/oauth2/token")
-                .WithHeader("Accept", "x-www-form-urlencoded")
                 .WithBasicAuth(_config.ClientId, _config.Secret)
                 .PostUrlEncodedAsync(new { grant_type = "client_credentials" })
                 .ReceiveJson<PayPalAccessTokenResult>()
