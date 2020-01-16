@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Vendr.PaymentProviders.PayPal")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Outfield Digital Ltd")]
 [assembly: AssemblyProduct("Vendr.PaymentProviders.PayPal")]
 [assembly: AssemblyCopyright("Copyright © Outfield Digital Ltd 2019")]
 [assembly: AssemblyTrademark("")]
