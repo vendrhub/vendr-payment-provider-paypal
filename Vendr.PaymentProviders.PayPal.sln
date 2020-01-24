@@ -20,6 +20,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuSpecs", "NuSpecs", "{8106
 		build\NuSpecs\Vendr.PaymentProviders.PayPal.nuspec = build\NuSpecs\Vendr.PaymentProviders.PayPal.nuspec
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Umbraco", "Umbraco", "{678F3EA2-5E08-4732-A20A-4267565BA06F}"
+	ProjectSection(SolutionItems) = preProject
+		build\Umbraco\PayPal.package.xml = build\Umbraco\PayPal.package.xml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +41,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{81061D69-BD7A-443B-B18D-9BF1F4840A31} = {A2F6C69B-7FBB-4520-B282-1B47A0854A03}
+		{678F3EA2-5E08-4732-A20A-4267565BA06F} = {A2F6C69B-7FBB-4520-B282-1B47A0854A03}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B3A08DA4-571B-4CE5-A04A-7F7E8EC953F1}
