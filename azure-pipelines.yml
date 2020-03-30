@@ -7,7 +7,9 @@ trigger:
   branches:
     include: 
       - dev
-      - refs/tags/v*
+  tags:
+    include:
+      - v*
 
 variables:
   vmImageName: 'vs2017-win2016'
