@@ -60,7 +60,7 @@ namespace Vendr.PaymentProviders.PayPal
             return base.GetOrderReference(request, settings);
         }
 
-        public override PaymentForm GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, PayPalCheckoutOneTimeSettings settings)
+        public override PaymentFormResult GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, PayPalCheckoutOneTimeSettings settings)
         {
             // Get currency information
             var currency = Vendr.Services.CurrencyService.GetCurrency(order.CurrencyId);
@@ -95,10 +95,13 @@ namespace Vendr.PaymentProviders.PayPal
             var approveLink = payPalOrder.Links.FirstOrDefault(x => x.Rel == "approve");
             var approveLinkMethod = (FormMethod)Enum.Parse(typeof(FormMethod), approveLink.Method, true);
 
-            return new PaymentForm(approveLink.Href, approveLinkMethod);
+            return new PaymentFormResult()
+            {
+                Form = new PaymentForm(approveLink.Href, approveLinkMethod)
+            };
         }
 
-        public override CallbackResponse ProcessCallback(OrderReadOnly order, HttpRequestBase request, PayPalCheckoutOneTimeSettings settings)
+        public override CallbackResult ProcessCallback(OrderReadOnly order, HttpRequestBase request, PayPalCheckoutOneTimeSettings settings)
         {
             try
             {
@@ -136,20 +139,16 @@ namespace Vendr.PaymentProviders.PayPal
                         payPalPayment = payPalOrder.PurchaseUnits[0].Payments?.Captures?.FirstOrDefault();
                     }
 
-                    return new CallbackResponse
+                    return CallbackResult.Ok(new TransactionInfo
                     {
-                        TransactionInfo = new TransactionInfo
-                        {
-                            AmountAuthorized = decimal.Parse(payPalPayment?.Amount.Value ?? "0.00"),
-                            TransactionId = payPalPayment?.Id ?? "",
-                            PaymentStatus = GetPaymentStatus(payPalOrder)
-                        },
-                        MetaData = new Dictionary<string, string>
-                        {
-                            { "PayPalOrderId", payPalOrder.Id }
-                        },
-                        HttpResponse = new HttpResponseMessage(HttpStatusCode.OK)
-                    };
+                        AmountAuthorized = decimal.Parse(payPalPayment?.Amount.Value ?? "0.00"),
+                        TransactionId = payPalPayment?.Id ?? "",
+                        PaymentStatus = GetPaymentStatus(payPalOrder)
+                    },
+                    new Dictionary<string, string>
+                    {
+                        { "PayPalOrderId", payPalOrder.Id }
+                    });
                 }
             }
             catch (Exception ex)
@@ -157,13 +156,10 @@ namespace Vendr.PaymentProviders.PayPal
                 Vendr.Log.Error<PayPalCheckoutOneTimePaymentProvider>(ex, "PayPal - ProcessCallback");
             }
 
-            return new CallbackResponse
-            {
-                HttpResponse = new HttpResponseMessage(HttpStatusCode.BadRequest)
-            };
+            return CallbackResult.BadRequest();
         }
 
-        public override ApiResponse FetchPaymentStatus(OrderReadOnly order, PayPalCheckoutOneTimeSettings settings)
+        public override ApiResult FetchPaymentStatus(OrderReadOnly order, PayPalCheckoutOneTimeSettings settings)
         {
             try
             {
@@ -177,7 +173,14 @@ namespace Vendr.PaymentProviders.PayPal
 
                     var paymentStatus = GetPaymentStatus(payPalOrder, out PayPalPayment payPalPayment);
 
-                    return new ApiResponse(payPalPayment.Id, paymentStatus);
+                    return new ApiResult()
+                    {
+                        TransactionInfo = new TransactionInfoUpdate()
+                        {
+                            TransactionId = payPalPayment.Id,
+                            PaymentStatus = paymentStatus
+                        }
+                    };
                 }
             }
             catch (Exception ex)
@@ -185,10 +188,10 @@ namespace Vendr.PaymentProviders.PayPal
                 Vendr.Log.Error<PayPalCheckoutOneTimePaymentProvider>(ex, "PayPal - FetchPaymentStatus");
             }
 
-            return null;
+            return ApiResult.Empty;
         }
 
-        public override ApiResponse CapturePayment(OrderReadOnly order, PayPalCheckoutOneTimeSettings settings)
+        public override ApiResult CapturePayment(OrderReadOnly order, PayPalCheckoutOneTimeSettings settings)
         {
             try
             {
@@ -199,7 +202,14 @@ namespace Vendr.PaymentProviders.PayPal
 
                     var payPalPayment = client.CapturePayment(order.TransactionInfo.TransactionId);
 
-                    return new ApiResponse(payPalPayment.Id, GetPaymentStatus(payPalPayment));
+                    return new ApiResult()
+                    {
+                        TransactionInfo = new TransactionInfoUpdate()
+                        {
+                            TransactionId = payPalPayment.Id,
+                            PaymentStatus = GetPaymentStatus(payPalPayment)
+                        }
+                    };
                 }
             }
             catch (Exception ex)
@@ -207,10 +217,10 @@ namespace Vendr.PaymentProviders.PayPal
                 Vendr.Log.Error<PayPalCheckoutOneTimePaymentProvider>(ex, "PayPal - CapturePayment");
             }
 
-            return null;
+            return ApiResult.Empty;
         }
 
-        public override ApiResponse RefundPayment(OrderReadOnly order, PayPalCheckoutOneTimeSettings settings)
+        public override ApiResult RefundPayment(OrderReadOnly order, PayPalCheckoutOneTimeSettings settings)
         {
             try
             {
@@ -221,7 +231,14 @@ namespace Vendr.PaymentProviders.PayPal
 
                     var payPalPayment = client.RefundPayment(order.TransactionInfo.TransactionId);
 
-                    return new ApiResponse(payPalPayment.Id, GetPaymentStatus(payPalPayment));
+                    return new ApiResult()
+                    {
+                        TransactionInfo = new TransactionInfoUpdate()
+                        {
+                            TransactionId = payPalPayment.Id,
+                            PaymentStatus = GetPaymentStatus(payPalPayment)
+                        }
+                    };
                 }
             }
             catch (Exception ex)
@@ -229,10 +246,10 @@ namespace Vendr.PaymentProviders.PayPal
                 Vendr.Log.Error<PayPalCheckoutOneTimePaymentProvider>(ex, "PayPal - RefundPayment");
             }
 
-            return null;
+            return ApiResult.Empty;
         }
 
-        public override ApiResponse CancelPayment(OrderReadOnly order, PayPalCheckoutOneTimeSettings settings)
+        public override ApiResult CancelPayment(OrderReadOnly order, PayPalCheckoutOneTimeSettings settings)
         {
             try
             {
@@ -245,7 +262,14 @@ namespace Vendr.PaymentProviders.PayPal
 
                     // Cancel payment enpoint doesn't return a result so if the request is successfull 
                     // then we'll deem it as successfull and directly set the payment status to Cancelled
-                    return new ApiResponse(order.TransactionInfo.TransactionId, PaymentStatus.Cancelled);
+                    return new ApiResult()
+                    {
+                        TransactionInfo = new TransactionInfoUpdate()
+                        {
+                            TransactionId = order.TransactionInfo.TransactionId,
+                            PaymentStatus = PaymentStatus.Cancelled
+                        }
+                    };
                 }
             }
             catch (Exception ex)
@@ -253,7 +277,7 @@ namespace Vendr.PaymentProviders.PayPal
                 Vendr.Log.Error<PayPalCheckoutOneTimePaymentProvider>(ex, "PayPal - CancelPayment");
             }
 
-            return null;
+            return ApiResult.Empty;
         }
     }
 }
