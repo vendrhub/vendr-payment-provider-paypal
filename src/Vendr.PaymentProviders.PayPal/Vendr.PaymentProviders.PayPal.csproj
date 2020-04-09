@@ -115,7 +115,6 @@
     <Compile Include="PayPalSettingsBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PayPalPaymentProviderBase.cs" />
-    <Compile Include="PayPalPaymentProviderMode.cs" />
     <Compile Include="PayPalCheckoutOneTimeSettings.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
   </ItemGroup>
