@@ -49,10 +49,10 @@ namespace Vendr.PaymentProviders.PayPal
             SortOrder = 900)]
         public string LiveWebhookId { get; set; }
 
-        [PaymentProviderSetting(Name = "Mode",
-            Description = "Set whether to process payments in live or sandbox mode.",
+        [PaymentProviderSetting(Name = "Sandbox Mode",
+            Description = "Set whether to process payments in sandbox mode.",
             SortOrder = 1000000)]
-        public PayPalPaymentProviderMode Mode { get; set; }
+        public bool SandboxMode { get; set; }
 
         // Advanced settings
         [PaymentProviderSetting(Name = "Brand Name",

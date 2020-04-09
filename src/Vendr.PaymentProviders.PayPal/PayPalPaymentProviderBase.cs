@@ -137,7 +137,7 @@ namespace Vendr.PaymentProviders.PayPal
 
         protected PayPalClientConfig GetPayPalClientConfig(PayPalSettingsBase settings)
         {
-            if (settings.Mode == PayPalPaymentProviderMode.Live)
+            if (!settings.SandboxMode)
             {
                 return new LivePayPalClientConfig
                 {
