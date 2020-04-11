@@ -40,7 +40,7 @@ namespace Vendr.PaymentProviders.PayPal
             }
             else
             {
-                payPalWebhookEvent = client.ParseWebhookEvent(request);;
+                payPalWebhookEvent = client.ParseWebhookEvent(request);
 
                 HttpContext.Current.Items["Vendr_PayPalWebhookEvent"] = payPalWebhookEvent;
             }
