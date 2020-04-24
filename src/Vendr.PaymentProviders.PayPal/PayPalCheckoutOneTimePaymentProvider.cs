@@ -64,6 +64,13 @@ namespace Vendr.PaymentProviders.PayPal
         {
             // Get currency information
             var currency = Vendr.Services.CurrencyService.GetCurrency(order.CurrencyId);
+            var currencyCode = currency.Code.ToUpperInvariant();
+
+            // Ensure currency has valid ISO 4217 code
+            if (!Iso4217.CurrencyCodes.ContainsKey(currencyCode))
+            {
+                throw new Exception("Currency must be a valid ISO 4217 currency code: " + currency.Name);
+            }
 
             // Create the order
             var clientConfig = GetPayPalClientConfig(settings);
@@ -73,11 +80,14 @@ namespace Vendr.PaymentProviders.PayPal
                 Intent = settings.Capture 
                     ? PayPalOrder.Intents.CAPTURE 
                     : PayPalOrder.Intents.AUTHORIZE,
-                PurchaseUnits = new[] {
-                    new PayPalPurchaseUnitRequest {
+                PurchaseUnits = new[] 
+                {
+                    new PayPalPurchaseUnitRequest
+                    {
                         CustomId = order.GenerateOrderReference(),
-                        Amount = new PayPalAmount{
-                            CurrencyCode = currency.Code,
+                        Amount = new PayPalAmount
+                        {
+                            CurrencyCode = currencyCode,
                             Value = order.TotalPrice.Value.WithTax.ToString("0.00", CultureInfo.InvariantCulture)
                         }
                     }

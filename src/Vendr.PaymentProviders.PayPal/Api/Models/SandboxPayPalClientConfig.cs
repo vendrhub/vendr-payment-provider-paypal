@@ -2,6 +2,6 @@
 {
     public class SandboxPayPalClientConfig : PayPalClientConfig
     {
-        public override string BaseUrl => PayPalClient.SanboxApiUrl;
+        public override string BaseUrl => PayPalClient.SandboxApiUrl;
     }
 }

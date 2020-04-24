@@ -14,7 +14,7 @@ namespace Vendr.PaymentProviders.PayPal.Api
     {
         private static MemoryCache AccessTokenCache = new MemoryCache("PayPalClient_AccessTokenCache");
 
-        public const string SanboxApiUrl = "https://api.sandbox.paypal.com";
+        public const string SandboxApiUrl = "https://api.sandbox.paypal.com";
 
         public const string LiveApiUrl = "https://api.paypal.com";
 
