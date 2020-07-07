@@ -77,7 +77,7 @@ namespace Vendr.PaymentProviders.PayPal.Api
 
         public void CancelPayment(string paymentId)
         {
-            Request($"/v2/payments/authorizations/{paymentId}/capture", (req) => req
+            Request($"/v2/payments/authorizations/{paymentId}/void", (req) => req
                 .WithHeader("Prefer", "return=representation")
                 .PostJsonAsync(null));
         }
