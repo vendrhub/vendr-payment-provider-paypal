@@ -119,7 +119,7 @@ namespace Vendr.PaymentProviders.PayPal
                 var client = new PayPalClient(clientConfig);
                 var payPalWebhookEvent = GetPayPalWebhookEvent(client, request);
 
-                if (payPalWebhookEvent != null && payPalWebhookEvent.EventType.StartsWith("CHECKOUT.ORDER.APPROVED"))
+                if (payPalWebhookEvent != null && payPalWebhookEvent.EventType.StartsWith("CHECKOUT.ORDER."))
                 {
                     var webhookPayPalOrder = payPalWebhookEvent.Resource.ToObject<PayPalOrder>();
 

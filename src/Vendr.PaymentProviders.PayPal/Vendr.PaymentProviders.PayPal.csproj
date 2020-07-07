@@ -123,4 +123,16 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>REM #################################################
+REM # Copy files
+REM #################################################
+
+IF %25ComputerName%25 == DESKTOP-ESFKU58 (
+IF NOT "$(SolutionDir)" == "*Undefined*" (
+xcopy /s /y "$(TargetPath)" "$(SolutionDir)\..\..\Sandbox\src\Vendr.DemoStore.Web\bin"
+xcopy /s /y "$(TargetDir)$(ProjectName).pdb" "$(SolutionDir)\..\..\Sandbox\src\Vendr.DemoStore.Web\bin"
+)
+)</PostBuildEvent>
+  </PropertyGroup>
 </Project>
