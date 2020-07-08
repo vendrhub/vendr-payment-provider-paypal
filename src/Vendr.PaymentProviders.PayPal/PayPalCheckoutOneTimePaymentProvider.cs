@@ -30,8 +30,7 @@ namespace Vendr.PaymentProviders.PayPal
         public override bool FinalizeAtContinueUrl => false;
 
         public override IEnumerable<TransactionMetaDataDefinition> TransactionMetaDataDefinitions => new []{
-            new TransactionMetaDataDefinition("PayPalOrderId", "PayPal Order ID"),
-            new TransactionMetaDataDefinition("PayPalPaymentId", "PayPal Payment ID")
+            new TransactionMetaDataDefinition("PayPalOrderId", "PayPal Order ID")
         };
 
         public override OrderReference GetOrderReference(HttpRequestBase request, PayPalCheckoutOneTimeSettings settings)
