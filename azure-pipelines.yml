@@ -61,7 +61,7 @@ stages:
 
           steps:
           - script: |
-              echo %OUR_UMBRACO_API_KEY% 
+              echo %OUR_UMBRACO_API_KEY%
             displayName: 'Deploy to Our Umbraco'
             env:
               OUR_UMBRACO_API_KEY: $(our-umbraco-api-key)
