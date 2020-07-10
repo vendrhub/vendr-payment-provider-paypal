@@ -77,7 +77,7 @@ stages:
             displayName: 'Install UmbPack'
 
           - script: |
-              umbpack push -k %OUR_UMBRACO_API_KEY% -w v860,v850,v840,v830,v820 -c false -a $(packageName).*.zip $(umbracoPackageFile) 
+              umbpack push $(umbracoPackageFile) -k %OUR_UMBRACO_API_KEY% -w v860,v850,v840,v830,v820 -c false -a $(packageName).*.zip 
             displayName: 'Deploy to Our Umbraco'
             env:
               OUR_UMBRACO_API_KEY: $(our-umbraco-api-key)
