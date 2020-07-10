@@ -60,8 +60,24 @@ stages:
         deploy:
 
           steps:
+          - task: DotNetCoreInstaller@0
+            inputs:
+              version: 2.2.103
+
+          - powershell: |
+              # get the umbraco package file (assumes there is just one zip file package)
+              $f = (Get-ChildItem -Path "$(Pipeline.Workspace)\BuildArtifacts\packages\*" -File -Include $(packageName).*.zip | Select-Object -First 1).FullName
+              # assign the filename to a variable        
+              echo "$f"       
+              echo "##vso[task.setvariable variable=umbracoPackageFile]$f" 
+            displayName: 'Get Umbraco Package path'
+
           - script: |
-              echo %OUR_UMBRACO_API_KEY%
+              dotnet tool install --global Umbraco.Tools.Packages
+            displayName: 'Install UmbPack'
+
+          - script: |
+              umbpack push -k %OUR_UMBRACO_API_KEY% -w v860,v850,v840,v830,v820 -c false -a $(packageName).*.zip $(umbracoPackageFile) 
             displayName: 'Deploy to Our Umbraco'
             env:
               OUR_UMBRACO_API_KEY: $(our-umbraco-api-key)
