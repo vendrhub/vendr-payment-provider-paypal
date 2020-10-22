@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Runtime.Caching;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Vendr.PaymentProviders.PayPal.Api.Models;
@@ -15,14 +16,31 @@ namespace Vendr.PaymentProviders.PayPal.Api
         private static MemoryCache AccessTokenCache = new MemoryCache("PayPalClient_AccessTokenCache");
 
         public const string SandboxApiUrl = "https://api.sandbox.paypal.com";
+        public const string SandboxIpnUrl = "https://www.sandbox.paypal.com/cgi-bin/webscr";
 
         public const string LiveApiUrl = "https://api.paypal.com";
+        public const string LiveIpnUrl = "https://www.paypal.com/cgi-bin/webscr";
 
         private PayPalClientConfig _config;
 
         public PayPalClient(PayPalClientConfig config)
         {
             _config = config;
+        }
+
+        public bool IsIpnRequest(HttpRequestBase request)
+        {
+            return request.Headers["User-Agent"].Contains("PayPal IPN");
+        }
+
+        public bool VerifyIpnRequest(HttpRequestBase request)
+        {
+            var resp = new FlurlRequest(_config.IpnUrl)
+                .PostStringAsync("cmd=_notify-validate&" + Encoding.ASCII.GetString(request.BinaryRead(request.ContentLength)))
+                .ReceiveString()
+                .Result;
+
+            return resp == "VERIFIED";
         }
 
         public PayPalOrder CreateOrder(PayPalCreateOrderRequest request)

@@ -6,5 +6,6 @@
         public string Secret { get; set; }
         public string WebhookId { get; set; }
         public abstract string BaseUrl { get; }
+        public abstract string IpnUrl { get; }
     }
 }
