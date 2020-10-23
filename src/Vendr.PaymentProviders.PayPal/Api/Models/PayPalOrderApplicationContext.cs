@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
 
 namespace Vendr.PaymentProviders.PayPal.Api.Models
 {

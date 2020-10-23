@@ -19,39 +19,34 @@ namespace Vendr.PaymentProviders.PayPal
             SortOrder = 300)]
         public string ErrorUrl { get; set; }
 
-        [PaymentProviderSetting(Name = "Recipient",
-            Description = "The ID or Email of the recipient PayPal account",
-            SortOrder = 400)]
-        public string Recipient { get; set; }
-
         [PaymentProviderSetting(Name = "Sandbox Client ID",
             Description = "Your sandbox PayPal client id",
-            SortOrder = 500)]
+            SortOrder = 400)]
         public string SandboxClientId { get; set; }
 
         [PaymentProviderSetting(Name = "Sandbox Secret",
             Description = "Your sandbox PayPal secret",
-            SortOrder = 600)]
+            SortOrder = 500)]
         public string SandboxSecret { get; set; }
 
         [PaymentProviderSetting(Name = "Sandbox Webhook ID",
             Description = "Your sandbox PayPal webhook id",
-            SortOrder = 700)]
+            SortOrder = 600)]
         public string SandboxWebhookId { get; set; }
 
         [PaymentProviderSetting(Name = "Live Client ID",
             Description = "Your live PayPal client id",
-            SortOrder = 800)]
+            SortOrder = 700)]
         public string LiveClientId { get; set; }
 
         [PaymentProviderSetting(Name = "Live Secret",
             Description = "Your live PayPal secret",
-            SortOrder = 900)]
+            SortOrder = 800)]
         public string LiveSecret { get; set; }
 
         [PaymentProviderSetting(Name = "Live Webhook ID",
             Description = "Your live PayPal webhook id",
-            SortOrder = 1000)]
+            SortOrder = 900)]
         public string LiveWebhookId { get; set; }
 
         [PaymentProviderSetting(Name = "Sandbox Mode",
