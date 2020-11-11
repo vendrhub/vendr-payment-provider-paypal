@@ -97,7 +97,7 @@ namespace Vendr.PaymentProviders.PayPal
                         Amount = new PayPalAmount
                         {
                             CurrencyCode = currencyCode,
-                            Value = order.TotalPrice.Value.WithTax.ToString("0.00", CultureInfo.InvariantCulture)
+                            Value = order.TransactionAmount.Value.Value.ToString("0.00", CultureInfo.InvariantCulture)
                         }
                     }
                 },
