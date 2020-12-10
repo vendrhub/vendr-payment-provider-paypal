@@ -10,8 +10,6 @@ using Vendr.PaymentProviders.PayPal.Api.Models;
 using System.Web.Mvc;
 using Vendr.PaymentProviders.PayPal.Api;
 using System.Globalization;
-using System.Net.Http;
-using System.Net;
 using System.Collections.Generic;
 
 namespace Vendr.PaymentProviders.PayPal
@@ -43,12 +41,23 @@ namespace Vendr.PaymentProviders.PayPal
                 var client = new PayPalClient(clientConfig);
                 var payPalWebhookEvent = GetPayPalWebhookEvent(client, request);
 
-                if (payPalWebhookEvent != null && payPalWebhookEvent.EventType.StartsWith("CHECKOUT.ORDER."))
+                if (payPalWebhookEvent != null)
                 {
-                    var payPalOrder = payPalWebhookEvent.Resource.ToObject<PayPalOrder>();
-                    if (payPalOrder?.PurchaseUnits != null && payPalOrder.PurchaseUnits.Length == 1)
+                    if (payPalWebhookEvent.EventType.StartsWith("CHECKOUT.ORDER."))
                     {
-                        return OrderReference.Parse(payPalOrder.PurchaseUnits[0].CustomId);
+                        var payPalOrder = payPalWebhookEvent.Resource.ToObject<PayPalOrder>();
+                        if (payPalOrder?.PurchaseUnits != null && payPalOrder.PurchaseUnits.Length == 1)
+                        {
+                            return OrderReference.Parse(payPalOrder.PurchaseUnits[0].CustomId);
+                        }
+                    }
+                    else if (payPalWebhookEvent.EventType.StartsWith("PAYMENT."))
+                    {
+                        var payPalPayment = payPalWebhookEvent.Resource.ToObject<PayPalPayment>();
+                        if (payPalPayment != null)
+                        {
+                            return OrderReference.Parse(payPalPayment.CustomId);
+                        }
                     }
                 }
             }
@@ -88,7 +97,7 @@ namespace Vendr.PaymentProviders.PayPal
                         Amount = new PayPalAmount
                         {
                             CurrencyCode = currencyCode,
-                            Value = order.TotalPrice.Value.WithTax.ToString("0.00", CultureInfo.InvariantCulture)
+                            Value = order.TransactionAmount.Value.Value.ToString("0.00", CultureInfo.InvariantCulture)
                         }
                     }
                 },
@@ -119,46 +128,73 @@ namespace Vendr.PaymentProviders.PayPal
                 var client = new PayPalClient(clientConfig);
                 var payPalWebhookEvent = GetPayPalWebhookEvent(client, request);
 
-                if (payPalWebhookEvent != null && payPalWebhookEvent.EventType.StartsWith("CHECKOUT.ORDER.APPROVED"))
+                if (payPalWebhookEvent != null)
                 {
-                    var webhookPayPalOrder = payPalWebhookEvent.Resource.ToObject<PayPalOrder>();
+                    var metaData = new Dictionary<string, string>();
 
-                    // Fetch persisted order as it may have changed since the webhook 
-                    // was initially sent (it could be a webhook resend)
-                    var persistedPayPalOrder = client.GetOrder(webhookPayPalOrder.Id);
+                    PayPalOrder payPalOrder = null;
+                    PayPalPayment payPalPayment = null;
 
-                    PayPalOrder payPalOrder;
-                    PayPalPayment payPalPayment;
-
-                    if (persistedPayPalOrder.Intent == PayPalOrder.Intents.AUTHORIZE)
+                    if (payPalWebhookEvent.EventType.StartsWith("CHECKOUT.ORDER."))
                     {
-                        // Authorize
-                        payPalOrder = persistedPayPalOrder.Status != PayPalOrder.Statuses.APPROVED
-                            ? persistedPayPalOrder
-                            : client.AuthorizeOrder(persistedPayPalOrder.Id);
+                        var webhookPayPalOrder = payPalWebhookEvent.Resource.ToObject<PayPalOrder>();
 
-                        payPalPayment = payPalOrder.PurchaseUnits[0].Payments?.Authorizations?.FirstOrDefault();
+                        // Fetch persisted order as it may have changed since the webhook 
+                        // was initially sent (it could be a webhook resend)
+                        var persistedPayPalOrder = client.GetOrder(webhookPayPalOrder.Id);
+
+                        if (persistedPayPalOrder.Intent == PayPalOrder.Intents.AUTHORIZE)
+                        {
+                            // Authorize
+                            payPalOrder = persistedPayPalOrder.Status != PayPalOrder.Statuses.APPROVED
+                                ? persistedPayPalOrder
+                                : client.AuthorizeOrder(persistedPayPalOrder.Id);
+
+                            payPalPayment = payPalOrder.PurchaseUnits[0].Payments?.Authorizations?.FirstOrDefault();
+                        }
+                        else
+                        {
+                            // Capture
+                            payPalOrder = persistedPayPalOrder.Status != PayPalOrder.Statuses.APPROVED
+                                ? persistedPayPalOrder
+                                : client.CaptureOrder(persistedPayPalOrder.Id);
+
+                            payPalPayment = payPalOrder.PurchaseUnits[0].Payments?.Captures?.FirstOrDefault();
+                        }
+
+                        // Store the paypal order ID
+                        metaData.Add("PayPalOrderId", payPalOrder.Id);
                     }
-                    else
+                    else if (payPalWebhookEvent.EventType.StartsWith("PAYMENT."))
                     {
-                        // Capture
-                        payPalOrder = persistedPayPalOrder.Status != PayPalOrder.Statuses.APPROVED
-                            ? persistedPayPalOrder
-                            : client.CaptureOrder(persistedPayPalOrder.Id);
-
-                        payPalPayment = payPalOrder.PurchaseUnits[0].Payments?.Captures?.FirstOrDefault();
+                        // Listen for payment changes and update the status accordingly
+                        // NB: These tend to be pretty delayed so shouldn't cause a huge issue but it's worth knowing
+                        // that these will be notified after clicking the cancel / capture / refund buttons too so
+                        // effectively the order will get updated twice. It's important to know as it could cause
+                        // issues if they were to overlap and cause concurrency issues?
+                        if (payPalWebhookEvent.ResourceType == PayPalWebhookEvent.ResourceTypes.Payment.AUTHORIZATION)
+                        {
+                            payPalPayment = payPalWebhookEvent.Resource.ToObject<PayPalAuthorizationPayment>();
+                        }
+                        else if (payPalWebhookEvent.ResourceType == PayPalWebhookEvent.ResourceTypes.Payment.CAPTURE)
+                        {
+                            payPalPayment = payPalWebhookEvent.Resource.ToObject<PayPalCapturePayment>();
+                        }
+                        else if (payPalWebhookEvent.ResourceType == PayPalWebhookEvent.ResourceTypes.Payment.REFUND)
+                        {
+                            payPalPayment = payPalWebhookEvent.Resource.ToObject<PayPalRefundPayment>();
+                        }
                     }
 
                     return CallbackResult.Ok(new TransactionInfo
                     {
                         AmountAuthorized = decimal.Parse(payPalPayment?.Amount.Value ?? "0.00"),
-                        TransactionId = payPalPayment?.Id ?? "",
-                        PaymentStatus = GetPaymentStatus(payPalOrder)
+                        TransactionId = payPalPayment?.Id ?? order.TransactionInfo.TransactionId ?? "",
+                        PaymentStatus = payPalOrder != null
+                            ? GetPaymentStatus(payPalOrder)
+                            : GetPaymentStatus(payPalPayment)
                     },
-                    new Dictionary<string, string>
-                    {
-                        { "PayPalOrderId", payPalOrder.Id }
-                    });
+                    metaData);
                 }
             }
             catch (Exception ex)
