@@ -188,7 +188,7 @@ namespace Vendr.PaymentProviders.PayPal
 
                     return CallbackResult.Ok(new TransactionInfo
                     {
-                        AmountAuthorized = decimal.Parse(payPalPayment?.Amount.Value ?? "0.00"),
+                        AmountAuthorized = decimal.Parse(payPalPayment?.Amount.Value ?? "0.00", CultureInfo.InvariantCulture),
                         TransactionId = payPalPayment?.Id ?? order.TransactionInfo.TransactionId ?? "",
                         PaymentStatus = payPalOrder != null
                             ? GetPaymentStatus(payPalOrder)
