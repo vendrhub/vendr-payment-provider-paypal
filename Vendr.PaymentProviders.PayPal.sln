@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vendr.PaymentProvider.PayPal", "src\Vendr.PaymentProvider.PayPal\Vendr.PaymentProvider.PayPal.csproj", "{39BF8B51-BAA2-422D-B285-9DDD4ECD01F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vendr.PaymentProviders.PayPal", "src\Vendr.PaymentProviders.PayPal\Vendr.PaymentProviders.PayPal.csproj", "{39BF8B51-BAA2-422D-B285-9DDD4ECD01F6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{21B80098-4B45-485A-B38A-80EF6351CBBF}"
 EndProject
