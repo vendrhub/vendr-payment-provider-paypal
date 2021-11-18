@@ -61,5 +61,11 @@ namespace Vendr.PaymentProviders.PayPal
             IsAdvanced = true)]
         public string BrandName { get; set; }
 
+        [PaymentProviderSetting(Name = "Order Description",
+            Description = "A description to display next to the PayPal order line, defaults to the order number if not set",
+            SortOrder = 110,
+            IsAdvanced = true)]
+        public string OrderDescription { get; set; }
+
     }
 }
