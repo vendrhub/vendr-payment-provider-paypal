@@ -98,6 +98,9 @@ namespace Vendr.PaymentProviders.PayPal
                     new PayPalPurchaseUnitRequest
                     {
                         CustomId = ctx.Order.GenerateOrderReference(),
+                        Description = !string.IsNullOrWhiteSpace(ctx.Settings.OrderDescription)
+                            ? string.Format(ctx.Settings.OrderDescription, $"#{ctx.Order.OrderNumber}")
+                            : $"#{ctx.Order.OrderNumber}",
                         Amount = new PayPalAmount
                         {
                             CurrencyCode = currencyCode,
