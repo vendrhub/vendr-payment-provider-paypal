@@ -87,7 +87,7 @@ namespace Vendr.PaymentProviders.PayPal.Api
         {
             var payPalWebhookEvent = default(PayPalWebhookEvent);
 
-            var headers = request.Content.Headers;
+            var headers = request.Headers;
 
             using (var stream = await request.Content.ReadAsStreamAsync())
             {
