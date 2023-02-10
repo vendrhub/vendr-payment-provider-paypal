@@ -140,7 +140,7 @@ namespace Vendr.PaymentProviders.PayPal.Api
             }
             catch (FlurlHttpException ex)
             {
-                if (ex.Call.HttpStatus == HttpStatusCode.Unauthorized)
+                if (ex.Call.HttpResponseMessage.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     var accessToken = await GetAccessTokenAsync(true);
                     var req = new FlurlRequest(_config.BaseUrl + url)
