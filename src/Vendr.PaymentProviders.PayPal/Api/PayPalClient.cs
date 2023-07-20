@@ -1,11 +1,15 @@
 ﻿using Flurl.Http;
+using Flurl.Http.Content;
 using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.Caching;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Vendr.PaymentProviders.PayPal.Api.Models;
 
@@ -111,9 +115,11 @@ namespace Vendr.PaymentProviders.PayPal.Api
 
                     var webhookSignatureRequestStr = JsonConvert.SerializeObject(webhookSignatureRequest).Replace("{}", json);
 
+                    var content = new CapturedStringContent(webhookSignatureRequestStr, Encoding.UTF8, "application/json");
+
                     var result = await RequestAsync("/v1/notifications/verify-webhook-signature", async (req) => await req
                         .WithHeader("Content-Type", "application/json")
-                        .PostStringAsync(webhookSignatureRequestStr)
+                        .SendAsync(HttpMethod.Post, content)
                         .ReceiveJson<PayPalVerifyWebhookSignatureResult>());
 
                     if (result != null && result.VerificationStatus == "SUCCESS")
